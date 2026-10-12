@@ -17,3 +17,15 @@ StockFlow is a Flutter app for grocery stores and retail teams to manage invento
 ## Validation
 
 This project includes widget tests covering the primary login screen flow.
+
+## Project Structure
+
+- `lib/main.dart` boots the app
+- `lib/screens/login_screen.dart` contains the main login experience
+- `lib/widgets/app_button.dart` provides reusable UI actions
+
+Run tests with:
+
+```bash
+flutter test
+```

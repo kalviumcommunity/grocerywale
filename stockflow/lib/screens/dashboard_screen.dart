@@ -43,22 +43,29 @@ class DashboardScreen extends StatelessWidget {
           appBar: AppBar(
             title: Row(
               children: [
-                const Icon(Icons.storefront_outlined, color: Color(0xFF2563EB)),
+                Icon(
+                  isStoreRole ? Icons.storefront_outlined : Icons.warehouse_outlined,
+                  color: const Color(0xFF2563EB),
+                ),
                 const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isStoreRole ? currentStore.name : 'Central Warehouse Hub',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    Text(
-                      isStoreRole
-                          ? 'Store Mgr: ${currentStore.managerName}'
-                          : 'Central Warehouse Dispatch Console',
-                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isStoreRole ? currentStore.name : 'Central Warehouse Hub',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        isStoreRole
+                            ? 'Store Mgr: ${currentStore.managerName}'
+                            : 'Central Warehouse Dispatch Console',
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -73,7 +80,10 @@ class DashboardScreen extends StatelessWidget {
                   } else if (val == 'role_warehouse') {
                     inventoryService.setRole(UserRole.warehouseManager);
                   } else if (val.startsWith('store_')) {
-                    final store = inventoryService.stores.firstWhere((s) => s.id == val);
+                    final store = inventoryService.stores.firstWhere(
+                      (s) => s.id == val,
+                      orElse: () => inventoryService.currentStore,
+                    );
                     inventoryService.setActiveStore(store);
                     inventoryService.setRole(UserRole.storeManager);
                   }
@@ -281,17 +291,26 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildPipelineBadge('Requested', requestedCount, const Color(0xFFB45309)),
-                            const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
-                            _buildPipelineBadge('Approved', approvedCount, const Color(0xFF4338CA)),
-                            const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
-                            _buildPipelineBadge('Dispatched', dispatchedCount, const Color(0xFF0369A1)),
-                            const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
-                            _buildPipelineBadge('Received', receivedCount, const Color(0xFF15803D)),
-                          ],
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildPipelineBadge('Requested', requestedCount, const Color(0xFFB45309)),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
+                              const SizedBox(width: 8),
+                              _buildPipelineBadge('Approved', approvedCount, const Color(0xFF4338CA)),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
+                              const SizedBox(width: 8),
+                              _buildPipelineBadge('Dispatched', dispatchedCount, const Color(0xFF0369A1)),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
+                              const SizedBox(width: 8),
+                              _buildPipelineBadge('Received', receivedCount, const Color(0xFF15803D)),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -353,6 +372,51 @@ class DashboardScreen extends StatelessWidget {
                             ),
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: Color(0xFFDC2626)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              if (onNavigateTab != null) {
+                                onNavigateTab!(3); // Navigate to Warehouse Console tab
+                              }
+                            },
+                            icon: const Icon(Icons.warehouse, size: 18),
+                            label: const Text('Dispatch Console'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2563EB),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              if (onNavigateTab != null) {
+                                onNavigateTab!(1); // Navigate to Pipeline tab
+                              }
+                            },
+                            icon: const Icon(Icons.sync_alt, color: Color(0xFF2563EB), size: 18),
+                            label: const Text(
+                              'Review Pipeline',
+                              style: TextStyle(color: Color(0xFF2563EB)),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFF2563EB)),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),

@@ -144,7 +144,7 @@ class ReplenishmentItem {
       unit: item.unit,
       isFastMoving: item.velocity == ItemVelocity.fastMoving,
       requestedQuantity: quantity,
-      approvedQuantity: quantity,
+      approvedQuantity: 0,
       receivedQuantity: 0,
       unitPrice: item.unitPrice,
     );

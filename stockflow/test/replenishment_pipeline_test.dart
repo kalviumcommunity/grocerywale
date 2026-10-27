@@ -106,5 +106,32 @@ void main() {
       final storeIds = warehouseRequests.map((r) => r.storeId).toSet();
       expect(storeIds.length, greaterThanOrEqualTo(1));
     });
+
+    test('New ReplenishmentItem has approvedQuantity == 0 before approval', () {
+      final bread = service.catalog.firstWhere((i) => i.id == 'item_bread_sliced');
+      final item = ReplenishmentItem.fromGroceryItem(bread, 25);
+      expect(item.requestedQuantity, 25);
+      expect(item.approvedQuantity, 0);
+      expect(item.receivedQuantity, 0);
+    });
+
+    test('Cancellation cannot re-cancel already cancelled requests', () {
+      final req = service.requests.firstWhere((r) => r.status == ReplenishmentStatus.requested);
+      final cancelledFirst = service.cancelRequest(req.id, reason: 'Duplicate order');
+      expect(cancelledFirst, isTrue);
+
+      final cancelledSecond = service.cancelRequest(req.id, reason: 'Duplicate order again');
+      expect(cancelledSecond, isFalse);
+    });
+
+    test('Reset demo data restores catalog and requests to default state', () {
+      final initialCount = service.requests.length;
+      final milk = service.catalog.firstWhere((i) => i.id == 'item_milk_1l');
+      service.quickRestockFastMovingItem(milk);
+      expect(service.requests.length, initialCount + 1);
+
+      service.resetDemoData();
+      expect(service.requests.length, 4);
+    });
   });
 }

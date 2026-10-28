@@ -381,6 +381,28 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
                     ),
                   ),
 
+                // Option to cancel request if requested or approved
+                if (request.status == ReplenishmentStatus.requested ||
+                    request.status == ReplenishmentStatus.approved) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showCancelDialog(context, request),
+                      icon: const Icon(Icons.cancel_outlined, color: Color(0xFFDC2626)),
+                      label: const Text(
+                        'Cancel Replenishment Request',
+                        style: TextStyle(color: Color(0xFFDC2626)),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFFCA5A5)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ),
+                ],
+
                 const SizedBox(height: 30),
               ],
             ),
@@ -449,9 +471,67 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
     );
   }
 
+  void _showCancelDialog(BuildContext context, ReplenishmentRequest request) {
+    final reasonController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel Request'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Are you sure you want to cancel order ${request.id}? Any allocated warehouse inventory will be released.',
+              style: const TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonController,
+              decoration: const InputDecoration(
+                labelText: 'Reason for Cancellation (optional)',
+                hintText: 'e.g. Duplicated request, shelf space unavailable...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Keep Order'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              inventoryService.cancelRequest(
+                request.id,
+                reason: reasonController.text.trim().isNotEmpty
+                    ? reasonController.text.trim()
+                    : null,
+              );
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Order ${request.id} has been cancelled.'),
+                  backgroundColor: const Color(0xFFDC2626),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Cancel Order'),
+          ),
+        ],
+      ),
+    ).then((_) => reasonController.dispose());
+  }
+
   void _showDispatchDialog(BuildContext context, ReplenishmentRequest request) {
     final carrierController = TextEditingController(text: 'FastDelivery Reefer #08');
-    final trackingController = TextEditingController(text: 'TRK-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}');
+    final trackingController = TextEditingController(
+        text: 'TRK-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}');
 
     showDialog(
       context: context,
@@ -504,6 +584,9 @@ class _RequestDetailScreenState extends State<RequestDetailScreen> {
           ],
         );
       },
-    );
+    ).then((_) {
+      carrierController.dispose();
+      trackingController.dispose();
+    });
   }
 }

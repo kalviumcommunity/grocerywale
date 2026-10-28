@@ -19,5 +19,14 @@ void main() {
     expect(find.text('Pipeline'), findsOneWidget);
     expect(find.text('Inventory'), findsOneWidget);
     expect(find.text('Warehouse'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+
+    // Tap on Profile tab
+    await tester.tap(find.text('Profile'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Profile & Settings'), findsOneWidget);
+    expect(find.text('Switch Active Role'), findsOneWidget);
+    expect(find.text('Log Out'), findsOneWidget);
   });
 }

@@ -26,6 +26,54 @@ class InventoryService extends ChangeNotifier {
   List<ReplenishmentRequest> _requests = [];
   List<ReplenishmentRequest> get requests => List.unmodifiable(_requests);
 
+  int _requestCounter = 1000;
+
+  // Preferences & User Settings
+  bool _stockoutAlertsEnabled = true;
+  bool get stockoutAlertsEnabled => _stockoutAlertsEnabled;
+
+  bool _autoReorderSuggestions = true;
+  bool get autoReorderSuggestions => _autoReorderSuggestions;
+
+  bool _soundAlertsEnabled = false;
+  bool get soundAlertsEnabled => _soundAlertsEnabled;
+
+  void toggleStockoutAlerts(bool value) {
+    _stockoutAlertsEnabled = value;
+    notifyListeners();
+  }
+
+  void toggleAutoReorder(bool value) {
+    _autoReorderSuggestions = value;
+    notifyListeners();
+  }
+
+  void toggleSoundAlerts(bool value) {
+    _soundAlertsEnabled = value;
+    notifyListeners();
+  }
+
+  String get currentUserName =>
+      _currentRole == UserRole.storeManager ? _currentStore.managerName : 'Marcus Vance';
+
+  String get currentUserEmail => _currentRole == UserRole.storeManager
+      ? '${_currentStore.managerName.toLowerCase().replaceAll(' ', '.')}@grocerywale.com'
+      : 'marcus.vance@grocerywale.com';
+
+  String get currentUserPhone =>
+      _currentRole == UserRole.storeManager ? _currentStore.contactPhone : '+1 555-0199';
+
+  String get currentEmployeeId =>
+      _currentRole == UserRole.storeManager ? 'GW-${_currentStore.code}' : 'GW-WH-001';
+
+  String get currentRoleTitle =>
+      _currentRole == UserRole.storeManager ? 'Store Manager' : 'Central Warehouse Supervisor';
+
+  void resetDemoData() {
+    _initData();
+    notifyListeners();
+  }
+
   void setRole(UserRole role) {
     if (_currentRole != role) {
       _currentRole = role;
@@ -438,7 +486,8 @@ class InventoryService extends ChangeNotifier {
   }) {
     final targetStore = forStore ?? _currentStore;
     final now = DateTime.now();
-    final newId = 'REQ-2026-${(1000 + _requests.length + 1).toString().padLeft(4, '0')}';
+    _requestCounter++;
+    final newId = 'REQ-2026-${_requestCounter.toString().padLeft(4, '0')}';
 
     final newRequest = ReplenishmentRequest(
       id: newId,
@@ -580,7 +629,9 @@ class InventoryService extends ChangeNotifier {
     if (index == -1) return false;
 
     final req = _requests[index];
-    if (req.status == ReplenishmentStatus.received) return false;
+    if (req.status == ReplenishmentStatus.received || req.status == ReplenishmentStatus.cancelled) {
+      return false;
+    }
 
     // If was approved or dispatched, return allocated stock to warehouse
     if (req.status == ReplenishmentStatus.approved || req.status == ReplenishmentStatus.dispatched) {

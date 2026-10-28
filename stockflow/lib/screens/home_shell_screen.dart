@@ -4,6 +4,7 @@ import 'dashboard_screen.dart';
 import 'pipeline_screen.dart';
 import 'inventory_screen.dart';
 import 'warehouse_console_screen.dart';
+import 'profile_screen.dart';
 
 class HomeShellScreen extends StatefulWidget {
   const HomeShellScreen({super.key});
@@ -32,6 +33,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
           const PipelineScreen(),
           const InventoryScreen(),
           const WarehouseConsoleScreen(),
+          const ProfileScreen(),
         ];
 
         return Scaffold(
@@ -75,6 +77,11 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 icon: Icon(Icons.warehouse_outlined),
                 activeIcon: Icon(Icons.warehouse),
                 label: 'Warehouse',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                activeIcon: Icon(Icons.person),
+                label: 'Profile',
               ),
             ],
           ),

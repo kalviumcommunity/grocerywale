@@ -375,6 +375,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                                               fontWeight: FontWeight.bold,
                                               fontSize: 14,
                                             ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                         if (item.velocity == ItemVelocity.fastMoving) ...[
@@ -488,7 +489,9 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
 
     for (final entry in _selectedQuantities.entries) {
       if (entry.value <= 0) continue;
-      final catalogItem = catalog.firstWhere((c) => c.id == entry.key);
+      final catalogItemIndex = catalog.indexWhere((c) => c.id == entry.key);
+      if (catalogItemIndex == -1) continue;
+      final catalogItem = catalog[catalogItemIndex];
       items.add(ReplenishmentItem.fromGroceryItem(catalogItem, entry.value));
     }
 
